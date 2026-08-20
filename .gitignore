@@ -39,3 +39,9 @@ coverage/
 
 # Vite
 .vite/
+*.log
+
+# AI coding tools
+.agents/
+.claude/
+.windsurf
