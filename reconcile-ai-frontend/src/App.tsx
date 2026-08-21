@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import DashboardLayout from "./layouts/DashboardLayout";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
 
 function App() {
@@ -12,17 +13,18 @@ function App() {
       <Route path="/login/*" element={<Login />} />
       <Route path="/signup/*" element={<Signup />} />
 
-      {/* Protected routes */}
+      {/* Protected application */}
       <Route
-        path="/dashboard"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <DashboardLayout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Route>
 
-      {/* Unknown route */}
+      {/* Fallback */}
       <Route
         path="*"
         element={<Navigate to="/dashboard" replace />}
