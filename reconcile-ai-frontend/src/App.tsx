@@ -1,51 +1,33 @@
-import { useEffect, useState } from "react";
-import type { HealthCheckResponse } from "./types/health";
-import { checkHealth } from "./lib/api";
+import { Navigate, Route, Routes } from "react-router-dom";
+
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Dashboard from "./pages/Dashboard";
+import { ProtectedRoute } from "./routes/ProtectedRoute";
 
 function App() {
-  const [health, setHealth] = useState<HealthCheckResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    checkHealth()
-      .then(setHealth)
-      .catch((err) => setError(err.message));
-  }, []);
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <div className="p-8 bg-white rounded-lg shadow-md border border-slate-200">
-        <h1 className="text-xl font-semibold text-slate-800 mb-4">
-          ReconcileAI — Day 1 Health Check
-        </h1>
+    <Routes>
+      {/* Public routes */}
+      <Route path="/login/*" element={<Login />} />
+      <Route path="/signup/*" element={<Signup />} />
 
-        {error && (
-          <p className="text-red-600">
-            Error: {error}
-          </p>
-        )}
+      {/* Protected routes */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
 
-        {health && (
-          <div className="space-y-1 text-sm text-slate-600">
-            <p>
-              Status:{" "}
-              <span className="font-medium">{health.status}</span>
-            </p>
-
-            <p>
-              Database:{" "}
-              <span className="font-medium">{health.database}</span>
-            </p>
-
-            <p>Timestamp: {health.timestamp}</p>
-          </div>
-        )}
-
-        {!health && !error && (
-          <p className="text-slate-400">Checking...</p>
-        )}
-      </div>
-    </div>
+      {/* Unknown route */}
+      <Route
+        path="*"
+        element={<Navigate to="/dashboard" replace />}
+      />
+    </Routes>
   );
 }
 
