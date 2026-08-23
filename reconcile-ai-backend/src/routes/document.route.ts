@@ -5,6 +5,7 @@ import {
   uploadDocument,
   getDocuments,
 } from "../controllers/document.controller";
+import { triggerProcessing } from "../controllers/processing.controller";
 
 const router = Router();
 
@@ -20,5 +21,14 @@ router.get(
   requireAuthMiddleware,
   getDocuments
 );
+
+
+router.post(
+  "/:id/process",
+  requireAuthMiddleware,
+  triggerProcessing
+);
+
+
 
 export default router;
