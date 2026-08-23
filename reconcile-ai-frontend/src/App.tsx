@@ -5,6 +5,8 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import DashboardLayout from "./layouts/DashboardLayout";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
+import Documents from "./pages/Documents";
+import Transactions from "./pages/Transactions";
 
 function App() {
   return (
@@ -12,7 +14,6 @@ function App() {
       {/* Public routes */}
       <Route path="/login/*" element={<Login />} />
       <Route path="/signup/*" element={<Signup />} />
-
       {/* Protected application */}
       <Route
         element={
@@ -21,7 +22,9 @@ function App() {
           </ProtectedRoute>
         }
       >
-        <Route path="/dashboard" element={<Dashboard />} />
+         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/documents" element={<Documents />} />
+        <Route path="/transactions" element={<Transactions />} />
       </Route>
 
       {/* Fallback */}
