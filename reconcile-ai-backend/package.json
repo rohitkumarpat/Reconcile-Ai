@@ -16,13 +16,17 @@
   "type": "commonjs",
   "dependencies": {
     "@clerk/express": "^2.1.61",
+    "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^6.19.3",
     "cloudinary": "^2.10.1",
     "cors": "^2.8.6",
+    "csv-parse": "^7.0.2",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "multer": "^2.2.0",
+    "pdf-parse": "^2.4.5",
     "streamifier": "^0.1.1",
+    "tesseract.js": "^7.0.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -30,6 +34,7 @@
     "@types/express": "^5.0.6",
     "@types/multer": "^2.2.0",
     "@types/node": "^26.2.0",
+    "@types/pdf-parse": "^1.1.5",
     "@types/streamifier": "^0.1.2",
     "prisma": "^6.19.3",
     "tsx": "^4.23.12",
