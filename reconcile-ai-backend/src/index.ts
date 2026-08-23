@@ -4,6 +4,9 @@ import dotenv from "dotenv";
 import healthRoute from "./routes/health.route";
 import { withClerk } from "./middleware/auth.middleware";
 import userRoute from "./routes/user.route";
+import documentRoute from "./routes/document.route";
+import transactionRoute from "./routes/transaction.route";
+
 
 dotenv.config();
 
@@ -17,6 +20,10 @@ app.use(withClerk);
 
 app.use("/api/health", healthRoute);
 app.use("/api/users", userRoute);
+app.use("/api/documents", documentRoute);
+app.use("/api/transactions", transactionRoute);
+
+
 
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);
