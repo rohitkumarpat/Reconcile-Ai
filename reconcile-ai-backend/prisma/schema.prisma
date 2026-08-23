@@ -8,9 +8,53 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  clerkId   String   @unique
-  email     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String              @id @default(cuid())
+  clerkId      String              @unique
+  email        String              @unique
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  documents    FinancialDocument[]
+  transactions Transaction[]
+}
+
+enum DocumentType {
+  BANK_STATEMENT
+  UPI_STATEMENT
+  CREDIT_CARD_STATEMENT
+  RECEIPT
+  CSV
+}
+
+enum DocumentStatus {
+  UPLOADED
+  PROCESSING
+  PROCESSED
+  FAILED
+}
+
+
+model FinancialDocument {
+  id           String         @id @default(cuid())
+  userId       String
+  user         User           @relation(fields: [userId], references: [id])
+  fileUrl      String
+  fileName     String
+  fileType     DocumentType
+  status       DocumentStatus @default(UPLOADED)
+  transactions Transaction[]
+  createdAt    DateTime       @default(now())
+}
+
+model Transaction {
+  id          String            @id @default(cuid())
+  userId      String
+  user        User              @relation(fields: [userId], references: [id])
+  documentId  String?
+  document    FinancialDocument? @relation(fields: [documentId], references: [id])
+  merchant    String
+  amount      Float
+  category    String?
+  date        DateTime
+  description String?
+  createdAt   DateTime          @default(now())
 }
