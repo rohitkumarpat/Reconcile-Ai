@@ -15,6 +15,7 @@ model User {
   updatedAt    DateTime            @updatedAt
   documents    FinancialDocument[]
   transactions Transaction[]
+  agentRuns    AgentRun[]
 }
 
 enum DocumentType {
@@ -57,4 +58,15 @@ model Transaction {
   date        DateTime
   description String?
   createdAt   DateTime          @default(now())
+}
+
+
+
+model AgentRun {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  status    String
+  summary   Json
+  createdAt DateTime @default(now())
 }
