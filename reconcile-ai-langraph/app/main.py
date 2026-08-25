@@ -29,12 +29,17 @@ async def run_agent(
     verify_secret(x_internal_secret)
 
     result = agent_graph.invoke({
-        "transactions": payload.transactions,
-        "categorized": [],
-        "summary": {},
-    })
-
+    "transactions": payload.transactions,
+    "categorized": [],
+    "summary": {},
+    "duplicates": [],
+    "subscriptions": [],
+    "anomalies": [],
+})
     return AgentRunResponse(
-        categorized=result["categorized"],
-        summary=result["summary"],
-    )
+    categorized=result["categorized"],
+    summary=result["summary"],
+    duplicates=result["duplicates"],
+    subscriptions=result["subscriptions"],
+    anomalies=result["anomalies"],
+)

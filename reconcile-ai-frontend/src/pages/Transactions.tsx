@@ -4,6 +4,9 @@ import { EmptyState } from "../components/ui/EmptyState";
 import { Skeleton } from "../components/ui/Skeleton";
 import { useTransactionsApi } from "../services/transactions";
 
+
+
+
 interface Txn {
   id: string;
   merchant: string;
@@ -16,15 +19,21 @@ export default function Transactions() {
   const { list } = useTransactionsApi();
   const [txns, setTxns] = useState<Txn[] | null>(null);
 
+
+
   useEffect(() => {
     list().then(setTxns);
   }, []);
+
+  
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-display font-semibold">
         Transactions
       </h1>
+
+
 
       {txns === null && <Skeleton className="h-40" />}
 

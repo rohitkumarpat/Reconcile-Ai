@@ -1,13 +1,27 @@
 import { prisma } from "../lib/prisma";
 
 interface AgentRunResult {
-  categorized: {
-    id: string;
-    category: string;
+  categorized: { id: string; category: string; confidence: number }[];
+  summary:any;
+  duplicates: {
+    transaction_id: string;
+    duplicate_of_id: string;
     confidence: number;
   }[];
-  summary: any;
+  subscriptions: {
+    merchant: string;
+    amount: number;
+    frequency: string;
+    transaction_ids: string[];
+  }[];
+  anomalies: {
+    transaction_id: string;
+    type: string;
+    explanation: string;
+    confidence: number;
+  }[];
 }
+
 
 export async function runAgentOnTransactions(userId: string) {
   const transactions = await prisma.transaction.findMany({
@@ -41,21 +55,45 @@ export async function runAgentOnTransactions(userId: string) {
   const result: AgentRunResult = await res.json();
 
   await prisma.$transaction([
-    ...result.categorized.map((c) =>
-      prisma.transaction.update({
-        where: { id: c.id },
-        data: { category: c.category },
-      })
-    ),
+  ...result.categorized.map((c) =>
+    prisma.transaction.update({
+      where: { id: c.id },
+      data: { category: c.category }
+    })
+  ),
 
-    prisma.agentRun.create({
+  ...result.anomalies.flatMap((a) => [
+    prisma.anomaly.create({
       data: {
         userId,
-        status: "COMPLETED",
-        summary: result.summary,
+        transactionId: a.transaction_id,
+        type: a.type as any,
+        explanation: a.explanation,
+        confidence: a.confidence,
       },
     }),
-  ]);
+  ]),
+
+  ...result.subscriptions.map((s) =>
+    prisma.subscription.create({
+      data: {
+        userId,
+        merchant: s.merchant,
+        amount: s.amount,
+        frequency: s.frequency,
+        lastSeen: new Date(),
+      },
+    })
+  ),
+
+  prisma.agentRun.create({
+    data: {
+      userId,
+      status: "COMPLETED",
+      summary: result.summary
+    }
+  }),
+]);
 
   return result;
 }

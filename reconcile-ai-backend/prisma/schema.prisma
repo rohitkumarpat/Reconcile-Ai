@@ -16,6 +16,9 @@ model User {
   documents    FinancialDocument[]
   transactions Transaction[]
   agentRuns    AgentRun[]
+
+  subscriptions Subscription[]
+  anomalies     Anomaly[]
 }
 
 enum DocumentType {
@@ -58,6 +61,7 @@ model Transaction {
   date        DateTime
   description String?
   createdAt   DateTime          @default(now())
+  anomalies Anomaly[]
 }
 
 
@@ -69,4 +73,38 @@ model AgentRun {
   status    String
   summary   Json
   createdAt DateTime @default(now())
+}
+
+
+
+
+model Subscription {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  merchant      String
+  amount        Float
+  frequency     String
+  lastSeen      DateTime
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+}
+
+enum AnomalyType {
+  DUPLICATE
+  UNUSUAL_SPENDING
+  FORGOTTEN_SUBSCRIPTION
+}
+
+model Anomaly {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  transactionId String?
+  transaction   Transaction? @relation(fields: [transactionId], references: [id])
+  type          AnomalyType
+  explanation   String
+  confidence    Float
+  resolved      Boolean     @default(false)
+  createdAt     DateTime    @default(now())
 }
