@@ -23,3 +23,5 @@ class CategorizedTransaction(BaseModel):
 class AgentRunResponse(BaseModel):
     categorized: list[CategorizedTransaction]
     summary: dict
+
+
