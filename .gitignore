@@ -45,3 +45,7 @@ coverage/
 .agents/
 .claude/
 .windsurf
+
+reconcile-ai-langraph/venv/
+reconcile-ai-langraph/.env
+reconcile-ai-backend/eng.traineddata
