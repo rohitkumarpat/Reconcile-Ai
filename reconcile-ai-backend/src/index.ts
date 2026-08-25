@@ -6,7 +6,7 @@ import { withClerk } from "./middleware/auth.middleware";
 import userRoute from "./routes/user.route";
 import documentRoute from "./routes/document.route";
 import transactionRoute from "./routes/transaction.route";
-
+import agentRoute from "./routes/agent.route";
 
 dotenv.config();
 
@@ -22,7 +22,7 @@ app.use("/api/health", healthRoute);
 app.use("/api/users", userRoute);
 app.use("/api/documents", documentRoute);
 app.use("/api/transactions", transactionRoute);
-
+app.use("/api/agent", agentRoute);
 
 
 app.listen(PORT, () => {
