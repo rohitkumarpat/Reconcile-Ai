@@ -10,6 +10,7 @@ import Transactions from "./pages/Transactions";
 import Agent from "./pages/Agent";
 import Subscriptions from "./pages/Subscriptions";
 import Anomalies from "./pages/Anomalies";
+import Settings from "./pages/Settings";
 function App() {
   return (
     <Routes>
@@ -30,6 +31,7 @@ function App() {
         <Route path="/agent" element={<Agent />} />
         <Route path="/subscriptions" element={<Subscriptions />} />
         <Route path="/anomalies" element={<Anomalies />} />
+        <Route path="/settings" element={<Settings />} />
       </Route>
 
       {/* Fallback */}

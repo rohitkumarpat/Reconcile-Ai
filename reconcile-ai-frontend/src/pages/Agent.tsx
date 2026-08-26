@@ -13,7 +13,8 @@ export default function Agent() {
   const [items, setItems] = useState<ActionItem[]>([]);
   const [editing, setEditing] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
-
+   const [runLoading, setRunLoading] = useState(false);
+   const [decidingId, setDecidingId] = useState<string | null>(null);
   useEffect(() => {
   (async () => {
     const token = await getToken();
@@ -31,55 +32,43 @@ export default function Agent() {
   })();
 }, []);
 
+
+
 async function runAgent() {
-  const token = await getToken();
-
-  const res = await fetch(
-    `${import.meta.env.VITE_API_URL}/agent/full-run`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-
-  const data = await res.json();
-
-  setItems(data.recommendations);
+  setRunLoading(true);
+  try {
+    const token = await getToken();
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/agent/full-run`, {
+      method: "POST", headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    setItems(data.recommendations);
+  } finally {
+    setRunLoading(false);
+  }
 }
 
-  async function decide(
-    actionId: string,
-    decision: string,
-    text?: string
-  ) {
+async function decide(actionId: string, decision: string, text?: string) {
+  setDecidingId(actionId);
+  try {
     const token = await getToken();
-
-    await fetch(
-      `${import.meta.env.VITE_API_URL}/recommendations/actions/${actionId}`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          decision,
-          editedText: text,
-        }),
-      }
-    );
-
-    runAgent();
+    await fetch(`${import.meta.env.VITE_API_URL}/recommendations/actions/${actionId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ decision, editedText: text }),
+    });
+    await runAgent(); // or a lighter refetch
+  } finally {
+    setDecidingId(null);
   }
+}
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-display font-semibold">Agent</h1>
 
-        <Button onClick={runAgent}>Run Full Analysis</Button>
+        <Button onClick={runAgent} loading={runLoading}>Run Full Analysis</Button>
       </div>
 
       {items.map(({ action, recommendation }) => (
@@ -99,12 +88,7 @@ async function runAgent() {
           )}
 
           <div className="flex gap-2 mt-3">
-            <Button
-              variant="primary"
-              onClick={() => decide(action.id, "APPROVED")}
-            >
-              Approve
-            </Button>
+            <Button variant="primary" loading={decidingId === action.id} onClick={() => decide(action.id, "APPROVED")}>Approve</Button>
 
             <Button
               variant="secondary"
@@ -126,13 +110,7 @@ async function runAgent() {
                 Save Edit
               </Button>
             )}
-
-            <Button
-              variant="ghost"
-              onClick={() => decide(action.id, "REJECTED")}
-            >
-              Reject
-            </Button>
+           <Button variant="ghost" loading={decidingId === action.id} onClick={() => decide(action.id, "REJECTED")}>Reject</Button>
           </div>
         </Card>
       ))}

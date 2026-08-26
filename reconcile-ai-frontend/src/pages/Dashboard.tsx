@@ -4,6 +4,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { Card } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
 import { Skeleton } from "../components/ui/Skeleton";
+import { YearStepper } from "../components/YearStepper";
 
 interface Analytics {
   totalSpending: number;
@@ -50,9 +51,7 @@ export default function Dashboard() {
               <option key={i + 1} value={i + 1}>{new Date(2000, i).toLocaleString("default", { month: "long" })}</option>
             ))}
           </select>
-          <select value={year} onChange={(e) => setYear(Number(e.target.value))} className="text-sm border border-border rounded-lg px-3 py-1.5">
-            {[year - 1, year].map((y) => <option key={y} value={y}>{y}</option>)}
-          </select>
+          <YearStepper year={year} onChange={setYear} />
         </div>
       </div>
 
@@ -81,7 +80,11 @@ export default function Dashboard() {
                     <Pie data={Object.entries(data.byCategory).map(([name, value]) => ({ name, value }))} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
                       {Object.keys(data.byCategory).map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                     </Pie>
-                    <Tooltip formatter={(v: number) => `₹${v.toFixed(0)}`} />
+                    <Tooltip
+                      formatter={(v) =>
+                        typeof v === "number" ? `₹${v.toFixed(0)}` : "₹0"
+                      }
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               )}

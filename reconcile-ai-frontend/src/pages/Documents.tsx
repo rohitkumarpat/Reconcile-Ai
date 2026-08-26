@@ -18,7 +18,8 @@ interface Doc {
 export default function Documents() {
     const { upload, list } = useDocumentsApi();
     const { getToken } = useAuth();
-
+   const [processingId, setProcessingId] = useState<string | null>(null);
+   
     const API_URL = import.meta.env.VITE_API_URL;
     const [docs, setDocs] = useState<Doc[] | null>(null);
 
@@ -31,23 +32,16 @@ export default function Documents() {
         refresh();
     }, []);
 
-
-    async function processDoc(id: string) {
-        const token = await getToken();
-
-        const res = await fetch(`${API_URL}/documents/${id}/process`, {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
-
-        if (!res.ok) {
-            throw new Error("Document processing failed");
-        }
-
-        await refresh();
-    }
+async function processDoc(id: string) {
+  setProcessingId(id);
+  try {
+    const token = await getToken();
+    await fetch(`${API_URL}/documents/${id}/process`, { method: "POST", headers: { Authorization: `Bearer ${token}` } });
+    await refresh();
+  } finally {
+    setProcessingId(null);
+  }
+}
 
     return (
         <div className="space-y-6">
