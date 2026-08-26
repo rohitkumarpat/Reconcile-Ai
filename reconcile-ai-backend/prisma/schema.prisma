@@ -107,4 +107,5 @@ model Anomaly {
   confidence    Float
   resolved      Boolean     @default(false)
   createdAt     DateTime    @default(now())
+  relatedTransactionId String?
 }

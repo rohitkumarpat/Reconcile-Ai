@@ -62,6 +62,19 @@ export async function runAgentOnTransactions(userId: string) {
     })
   ),
 
+  ...result.duplicates.map((d) =>
+  prisma.anomaly.create({
+    data: {
+      userId,
+      transactionId: d.transaction_id,
+      relatedTransactionId: d.duplicate_of_id,
+      type: "DUPLICATE",
+      explanation: `Matches transaction on ${d.duplicate_of_id} — same merchant and amount within 3 days`,
+      confidence: d.confidence,
+    },
+  })
+),
+
   ...result.anomalies.flatMap((a) => [
     prisma.anomaly.create({
       data: {

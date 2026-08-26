@@ -218,7 +218,8 @@ Transactions:
 """
 
     response = llm.invoke(prompt)
-    parsed = json.loads(response.content)
+  
+    parsed = json.loads(response.content[0]["text"])
     explanation_map = {
         e["id"]: e["explanation"]
         for e in parsed["explanations"]
