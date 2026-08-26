@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { useAuth } from "@clerk/clerk-react";
@@ -14,13 +14,13 @@ export default function Agent() {
   const [editing, setEditing] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
 
-  async function runAgent() {
+  useEffect(() => {
+  (async () => {
     const token = await getToken();
 
     const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/recommendations/generate`,
+      `${import.meta.env.VITE_API_URL}/recommendations/actions`,
       {
-        method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -28,7 +28,26 @@ export default function Agent() {
     );
 
     setItems(await res.json());
-  }
+  })();
+}, []);
+
+async function runAgent() {
+  const token = await getToken();
+
+  const res = await fetch(
+    `${import.meta.env.VITE_API_URL}/agent/full-run`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const data = await res.json();
+
+  setItems(data.recommendations);
+}
 
   async function decide(
     actionId: string,
@@ -60,7 +79,7 @@ export default function Agent() {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-display font-semibold">Agent</h1>
 
-        <Button onClick={runAgent}>Run Agent</Button>
+        <Button onClick={runAgent}>Run Full Analysis</Button>
       </div>
 
       {items.map(({ action, recommendation }) => (
