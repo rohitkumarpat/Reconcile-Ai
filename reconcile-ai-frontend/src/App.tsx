@@ -9,7 +9,7 @@ import Documents from "./pages/Documents";
 import Transactions from "./pages/Transactions";
 import Agent from "./pages/Agent";
 import Subscriptions from "./pages/Subscriptions";
-
+import Anomalies from "./pages/Anomalies";
 function App() {
   return (
     <Routes>
@@ -29,6 +29,7 @@ function App() {
         <Route path="/transactions" element={<Transactions />} />
         <Route path="/agent" element={<Agent />} />
         <Route path="/subscriptions" element={<Subscriptions />} />
+        <Route path="/anomalies" element={<Anomalies />} />
       </Route>
 
       {/* Fallback */}
