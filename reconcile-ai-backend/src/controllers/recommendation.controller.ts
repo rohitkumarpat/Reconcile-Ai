@@ -59,21 +59,43 @@ export async function updateAction(req: Request, res: Response) {
 
 export async function getActions(req: Request, res: Response) {
   const { userId: clerkId } = getAuth(req);
-
-  if (!clerkId) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-
-  const user = await prisma.user.findUniqueOrThrow({
-    where: { clerkId },
-  });
+  if (!clerkId) return res.status(401).json({ error: "Unauthorized" });
+  const user = await prisma.user.findUniqueOrThrow({ where: { clerkId } });
 
   const actions = await listActions(user.id);
 
-  res.json(
-    actions.map((a) => ({
-      action: a,
-      recommendation: a.recommendation,
-    }))
-  );
+  // category averages computed from all of the user's transactions
+  const allTxns = await prisma.transaction.findMany({ where: { userId: user.id } });
+  const categoryStats: Record<string, { sum: number; count: number }> = {};
+  for (const t of allTxns) {
+    const cat = t.category ?? "Other";
+    if (!categoryStats[cat]) categoryStats[cat] = { sum: 0, count: 0 };
+    categoryStats[cat].sum += t.amount;
+    categoryStats[cat].count += 1;
+  }
+
+  const result = actions.map((a) => {
+    const txn = a.recommendation.anomaly?.transaction;
+    let impact = null;
+
+    if (txn) {
+      const cat = txn.category ?? "Other";
+      const stats = categoryStats[cat];
+      const avg = stats ? stats.sum / stats.count : 0;
+      if (avg > 0) {
+        impact = {
+          category: cat,
+          merchant: txn.merchant,
+          amount: txn.amount,
+          average: avg,
+          multiplier: txn.amount / avg,
+          aboveAverage: txn.amount - avg,
+        };
+      }
+    }
+
+    return { action: a, recommendation: a.recommendation, impact };
+  });
+
+  res.json(result);
 }

@@ -91,6 +91,7 @@ model Subscription {
   lastSeen      DateTime
   active        Boolean  @default(true)
   createdAt     DateTime @default(now())
+  recommendations Recommendation[]
 }
 
 enum AnomalyType {
@@ -128,14 +129,16 @@ enum ActionType {
 }
 
 model Recommendation {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  anomalyId   String?
-  anomaly     Anomaly? @relation(fields: [anomalyId], references: [id])
-  text        String
-  createdAt   DateTime @default(now())
-  action      Action?
+  id             String        @id @default(cuid())
+  userId         String
+  user           User          @relation(fields: [userId], references: [id])
+  anomalyId      String?
+  anomaly        Anomaly?      @relation(fields: [anomalyId], references: [id])
+  subscriptionId String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+  text           String
+  createdAt      DateTime      @default(now())
+  action         Action?
 }
 
 model Action {

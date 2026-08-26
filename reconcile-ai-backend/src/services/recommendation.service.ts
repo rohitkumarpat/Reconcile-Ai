@@ -2,57 +2,35 @@ import { prisma } from "../lib/prisma";
 
 export async function generateRecommendations(userId: string) {
   const [subscriptions, anomalies] = await Promise.all([
-    prisma.subscription.findMany({
-      where: { userId, active: true },
-    }),
-    prisma.anomaly.findMany({
-      where: { userId, resolved: false },
-    }),
+    prisma.subscription.findMany({ where: { userId, active: true } }),
+    prisma.anomaly.findMany({ where: { userId, resolved: false } }),
   ]);
 
-  const res = await fetch(
-    `${process.env.AGENT_SERVICE_URL}/agent/recommend`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-internal-secret": process.env.NODE_BACKEND_SECRET!,
-      },
-      body: JSON.stringify({
-        subscriptions: subscriptions.map((s) => ({
-          merchant: s.merchant,
-          amount: s.amount,
-          frequency: s.frequency,
-          transaction_ids: [],
-        })),
-        anomalies: anomalies.map((a) => ({
-          transaction_id: a.transactionId,
-          type: a.type,
-          explanation: a.explanation,
-          confidence: a.confidence,
-        })),
-      }),
-    }
-  );
+  const res = await fetch(`${process.env.AGENT_SERVICE_URL}/agent/recommend`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-internal-secret": process.env.NODE_BACKEND_SECRET! },
+    body: JSON.stringify({
+      subscriptions: subscriptions.map((s) => ({ merchant: s.merchant, amount: s.amount, frequency: s.frequency, transaction_ids: [] })),
+      anomalies: anomalies.map((a) => ({ transaction_id: a.transactionId, type: a.type, explanation: a.explanation, confidence: a.confidence })),
+    }),
+  });
 
-  if (!res.ok) {
-    throw new Error("Recommendation generation failed");
-  }
-
+  if (!res.ok) throw new Error("Recommendation generation failed");
   const { recommendations, drafts } = await res.json();
 
   const created = [];
-
   for (let i = 0; i < recommendations.length; i++) {
     const rec = recommendations[i];
-    const draft = drafts.find(
-      (d: any) => d.recommendation_index === i
-    );
+    const draft = drafts.find((d: any) => d.recommendation_index === i);
+
+    // match this recommendation back to the subscription it's about, if any
+    const matchedSubscription = subscriptions.find((s) => s.merchant === rec.subject_merchant);
 
     const recommendation = await prisma.recommendation.create({
       data: {
         userId,
         text: rec.text,
+        subscriptionId: matchedSubscription?.id,
       },
     });
 
@@ -65,19 +43,19 @@ export async function generateRecommendations(userId: string) {
         status: "PENDING",
       },
     });
-
     created.push({ recommendation, action });
   }
-
   return created;
 }
-
-
 
 export async function listActions(userId: string) {
   return prisma.action.findMany({
     where: { userId },
-    include: { recommendation: true },
+    include: {
+      recommendation: {
+        include: { anomaly: { include: { transaction: true } } },
+      },
+    },
     orderBy: { createdAt: "desc" },
   });
 }
