@@ -173,7 +173,4 @@ npm run dev
 
 ---
 
-## Notable Architectural Trade-offs
 
-- **No native LangGraph checkpointing/interrupt for human-in-the-loop.** The "correct" LangGraph-native approach uses a persistent checkpointer (e.g. `PostgresSaver`) so a graph run can pause mid-execution and resume later. This project instead ends the graph after producing a draft, and the Node backend holds "pending approval" state in Postgres, re-invoking the agent's recommend/draft step only when needed. This achieves the same human-approval guarantee with less infrastructure — a deliberate trade-off for a 9-day scope, not an oversight.
-- **Potential Savings** on the dashboard is calculated from the monthly amounts of subscriptions the agent specifically recommended for cancellation — not a flat percentage heuristic — but is not frequency-normalized (a flagged yearly subscription's raw amount, not amount ÷ 12, is summed alongside monthly ones).
