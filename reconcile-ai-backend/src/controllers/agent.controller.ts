@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { getAuth } from "@clerk/express";
 import { prisma } from "../lib/prisma";
 import { runAgentOnTransactions } from "../services/agent.service";
-
+import { runFullAnalysis } from "../services/agent.service";
 export async function triggerAgentRun(req: Request, res: Response) {
   const { userId: clerkId } = getAuth(req);
 
@@ -26,6 +26,33 @@ export async function triggerAgentRun(req: Request, res: Response) {
 
     return res.status(500).json({
       error: "Agent processing failed",
+    });
+  }
+}
+
+export async function triggerFullAnalysis(req: Request, res: Response) {
+  const { userId: clerkId } = getAuth(req);
+
+  if (!clerkId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const user = await prisma.user.findUniqueOrThrow({
+    where: { clerkId },
+  });
+
+  try {
+    const result = await runFullAnalysis(user.id);
+
+    res.json(result);
+  } catch (err) {
+    console.error(
+      "Full analysis failed:",
+      err instanceof Error ? err.message : err
+    );
+
+    res.status(500).json({
+      error: "Analysis failed",
     });
   }
 }

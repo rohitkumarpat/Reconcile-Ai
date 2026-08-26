@@ -4,6 +4,7 @@ import { prisma } from "../lib/prisma";
 import { generateRecommendations } from "../services/recommendation.service";
 import { decideAction } from "../services/action.service";
 import { z } from "zod";
+import { listActions } from "../services/recommendation.service";
 
 export async function triggerRecommendations(req: Request, res: Response) {
   const { userId: clerkId } = getAuth(req);
@@ -53,4 +54,26 @@ export async function updateAction(req: Request, res: Response) {
   );
 
   res.json(updated);
+}
+
+
+export async function getActions(req: Request, res: Response) {
+  const { userId: clerkId } = getAuth(req);
+
+  if (!clerkId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const user = await prisma.user.findUniqueOrThrow({
+    where: { clerkId },
+  });
+
+  const actions = await listActions(user.id);
+
+  res.json(
+    actions.map((a) => ({
+      action: a,
+      recommendation: a.recommendation,
+    }))
+  );
 }

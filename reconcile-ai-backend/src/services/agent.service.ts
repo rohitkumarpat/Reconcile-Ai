@@ -1,5 +1,5 @@
 import { prisma } from "../lib/prisma";
-
+import { generateRecommendations } from "./recommendation.service";
 interface AgentRunResult {
   categorized: { id: string; category: string; confidence: number }[];
   summary:any;
@@ -109,4 +109,15 @@ export async function runAgentOnTransactions(userId: string) {
 ]);
 
   return result;
+}
+
+
+export async function runFullAnalysis(userId: string) {
+  const runResult = await runAgentOnTransactions(userId);
+  const recommendations = await generateRecommendations(userId);
+
+  return {
+    runResult,
+    recommendations,
+  };
 }

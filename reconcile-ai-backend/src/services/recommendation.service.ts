@@ -71,3 +71,13 @@ export async function generateRecommendations(userId: string) {
 
   return created;
 }
+
+
+
+export async function listActions(userId: string) {
+  return prisma.action.findMany({
+    where: { userId },
+    include: { recommendation: true },
+    orderBy: { createdAt: "desc" },
+  });
+}
