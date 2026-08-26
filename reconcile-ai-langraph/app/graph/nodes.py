@@ -7,7 +7,7 @@ from app.schemas import CategorizedTransaction
 import time
 from datetime import datetime
 from collections import defaultdict
-from app.schemas import DuplicateFlag, SubscriptionResult, AnomalyResult
+from app.schemas import DuplicateFlag, SubscriptionResult, AnomalyResult,RecommendationResult,DraftResult
 
 
 llm = ChatGoogleGenerativeAI(
@@ -239,3 +239,53 @@ Transactions:
     ]
 
     return {**state, "anomalies": updated_anomalies}
+
+
+def recommend_node(subscriptions: list, anomalies: list) -> list[RecommendationResult]:
+    """LLM: turn flagged subscriptions/anomalies into plain-English recommendations."""
+    items = (
+        [{"kind": "subscription", "merchant": s.merchant, "amount": s.amount, "frequency": s.frequency} for s in subscriptions]
+        + [{"kind": "anomaly", "transaction_id": a.transaction_id, "explanation": a.explanation} for a in anomalies]
+    )
+
+    if not items:
+        return []
+
+    prompt = f"""For each item, write a one-sentence recommendation for the user and choose an action_type.
+Return ONLY JSON: {{"results": [{{"subject_merchant": str, "text": str, "action_type": "CANCELLATION_EMAIL" or "NEGOTIATION_MESSAGE"}}]}}
+
+Items:
+{json.dumps(items)}
+"""
+
+    response = llm.invoke(prompt)
+    parsed = json.loads(response.content[0]["text"])
+    return [RecommendationResult(**r) for r in parsed["results"]]
+
+
+
+def draft_node(recommendations: list[RecommendationResult]) -> list[DraftResult]:
+    """LLM: generate the actual draft message text. Never sent — draft only."""
+    if not recommendations:
+        return []
+
+    items = [
+        {
+            "i": i,
+            "merchant": r.subject_merchant,
+            "type": r.action_type
+        }
+        for i, r in enumerate(recommendations)
+    ]
+
+    prompt = f"""Write a polite, concise cancellation or negotiation message for each item, addressed
+to the merchant's support team. Return ONLY JSON: {{"drafts": [{{"recommendation_index": int, "draft_text": str}}]}}
+
+Items:
+{json.dumps(items)}
+"""
+
+    response = llm.invoke(prompt)
+    parsed = json.loads(response.content[0]["text"])
+
+    return [DraftResult(**d) for d in parsed["drafts"]]

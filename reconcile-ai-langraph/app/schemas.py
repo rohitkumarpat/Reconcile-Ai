@@ -51,3 +51,25 @@ class AgentRunResponse(BaseModel):
     duplicates: list[DuplicateFlag] = []
     subscriptions: list[SubscriptionResult] = []
     anomalies: list[AnomalyResult] = []
+
+
+class RecommendationResult(BaseModel):
+    anomaly_id: str | None = None
+    subject_merchant: str
+    text: str
+    action_type: str  # "CANCELLATION_EMAIL" | "NEGOTIATION_MESSAGE"
+
+
+class DraftResult(BaseModel):
+    recommendation_index: int
+    draft_text: str
+
+
+class RecommendRequest(BaseModel):
+    subscriptions: list[SubscriptionResult]
+    anomalies: list[AnomalyResult]
+
+
+class RecommendResponse(BaseModel):
+    recommendations: list[RecommendationResult]
+    drafts: list[DraftResult]
