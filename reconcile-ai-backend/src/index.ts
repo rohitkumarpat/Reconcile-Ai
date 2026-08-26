@@ -8,7 +8,7 @@ import documentRoute from "./routes/document.route";
 import transactionRoute from "./routes/transaction.route";
 import agentRoute from "./routes/agent.route";
 import recommendationRoute from "./routes/recommendation.route";
-
+import analyticsRoute from "./routes/analytics.route";
 dotenv.config();
 
 const app = express();
@@ -25,6 +25,7 @@ app.use("/api/documents", documentRoute);
 app.use("/api/transactions", transactionRoute);
 app.use("/api/agent", agentRoute);
 app.use("/api/recommendations", recommendationRoute);
+app.use("/api/analytics", analyticsRoute);
 
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);
