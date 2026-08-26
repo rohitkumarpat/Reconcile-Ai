@@ -19,6 +19,9 @@ model User {
 
   subscriptions Subscription[]
   anomalies     Anomaly[]
+
+  recommendations Recommendation[]
+  actions         Action[]
 }
 
 enum DocumentType {
@@ -108,4 +111,43 @@ model Anomaly {
   resolved      Boolean     @default(false)
   createdAt     DateTime    @default(now())
   relatedTransactionId String?
+  recommendations Recommendation[]
+}
+
+
+enum ActionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EDITED
+}
+
+enum ActionType {
+  CANCELLATION_EMAIL
+  NEGOTIATION_MESSAGE
+}
+
+model Recommendation {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  anomalyId   String?
+  anomaly     Anomaly? @relation(fields: [anomalyId], references: [id])
+  text        String
+  createdAt   DateTime @default(now())
+  action      Action?
+}
+
+model Action {
+  id               String          @id @default(cuid())
+  userId           String
+  user             User            @relation(fields: [userId], references: [id])
+  recommendationId String          @unique
+  recommendation   Recommendation  @relation(fields: [recommendationId], references: [id])
+  type             ActionType
+  draftText        String
+  finalText        String?
+  status           ActionStatus    @default(PENDING)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 }
