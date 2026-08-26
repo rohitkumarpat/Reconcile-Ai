@@ -6,12 +6,14 @@ import {
   getDocuments,
 } from "../controllers/document.controller";
 import { triggerProcessing } from "../controllers/processing.controller";
+import { uploadLimiter } from "../middleware/rateLimit.middleware";
 
 const router = Router();
 
 router.post(
   "/",
   requireAuthMiddleware,
+  uploadLimiter,
   upload.single("file"),
   uploadDocument
 );
