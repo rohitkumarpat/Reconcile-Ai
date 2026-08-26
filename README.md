@@ -2,8 +2,6 @@
 
 **AI-powered personal finance reconciliation agent.** Upload bank/UPI/credit-card statements and receipts — ReconcileAI extracts transactions, categorizes spending, detects duplicates, forgotten subscriptions, and unusual spending, then drafts cancellation/negotiation messages for human review and approval.
 
-Built as a 9-day incremental project across three independently deployed repositories, demonstrating a full agentic workflow rather than a simple LLM chatbot wrapper.
-
 ---
 
 ## Agentic Workflow
