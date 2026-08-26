@@ -7,6 +7,8 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
 import Documents from "./pages/Documents";
 import Transactions from "./pages/Transactions";
+import Agent from "./pages/Agent";
+import Subscriptions from "./pages/Subscriptions";
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
          <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/documents" element={<Documents />} />
         <Route path="/transactions" element={<Transactions />} />
+        <Route path="/agent" element={<Agent />} />
+        <Route path="/subscriptions" element={<Subscriptions />} />
       </Route>
 
       {/* Fallback */}
