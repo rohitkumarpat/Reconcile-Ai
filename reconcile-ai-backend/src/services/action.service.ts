@@ -8,18 +8,23 @@ export async function decideAction(
 ) {
   const action = await prisma.action.findFirstOrThrow({
     where: { id: actionId, userId },
+    include: { recommendation: { include: { anomaly: true } } },
   });
 
-  return prisma.action.update({
+  const updated = await prisma.action.update({
     where: { id: action.id },
     data: {
       status: decision,
-      finalText:
-        decision === "EDITED"
-          ? editedText
-          : decision === "APPROVED"
-            ? action.draftText
-            : null,
+      finalText: decision === "EDITED" ? editedText : decision === "APPROVED" ? action.draftText : null,
     },
   });
+
+  if ((decision === "APPROVED" || decision === "REJECTED") && action.recommendation.anomalyId) {
+    await prisma.anomaly.update({
+      where: { id: action.recommendation.anomalyId },
+      data: { resolved: true },
+    });
+  }
+
+  return updated;
 }

@@ -3,7 +3,7 @@ import { prisma } from "../lib/prisma";
 export async function generateRecommendations(userId: string) {
   const [subscriptions, anomalies] = await Promise.all([
     prisma.subscription.findMany({ where: { userId, active: true } }),
-    prisma.anomaly.findMany({ where: { userId, resolved: false } }),
+    prisma.anomaly.findMany({ where: { userId, resolved: false }, include: { transaction: true } }),
   ]);
 
   const res = await fetch(`${process.env.AGENT_SERVICE_URL}/agent/recommend`, {
@@ -23,14 +23,15 @@ export async function generateRecommendations(userId: string) {
     const rec = recommendations[i];
     const draft = drafts.find((d: any) => d.recommendation_index === i);
 
-    // match this recommendation back to the subscription it's about, if any
     const matchedSubscription = subscriptions.find((s) => s.merchant === rec.subject_merchant);
+    const matchedAnomaly = anomalies.find((a) => a.transaction?.merchant === rec.subject_merchant);
 
     const recommendation = await prisma.recommendation.create({
       data: {
         userId,
         text: rec.text,
         subscriptionId: matchedSubscription?.id,
+        anomalyId: matchedAnomaly?.id,
       },
     });
 
@@ -47,6 +48,7 @@ export async function generateRecommendations(userId: string) {
   }
   return created;
 }
+
 
 export async function listActions(userId: string) {
   return prisma.action.findMany({

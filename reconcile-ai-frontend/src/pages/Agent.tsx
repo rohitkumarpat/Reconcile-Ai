@@ -15,10 +15,21 @@ interface Impact {
 
 interface ActionItem {
   action: { id: string; draftText: string; status: string; updatedAt: string };
-  recommendation: { text: string };
+  recommendation: {
+    text: string;
+    anomaly?: { type: string } | null;
+    subscription?: unknown | null;
+  };
   impact: Impact | null;
 }
 
+function getLabel(recommendation: ActionItem["recommendation"]): string {
+  if (recommendation.anomaly?.type === "DUPLICATE") return "Duplicate Transaction";
+  if (recommendation.anomaly?.type === "UNUSUAL_SPENDING") return "Unusual Spending";
+  if (recommendation.anomaly?.type === "FORGOTTEN_SUBSCRIPTION") return "Forgotten Subscription";
+  if (recommendation.subscription) return "Subscription";
+  return "Recommendation";
+}
 function openGmailCompose(draftText: string, subject: string) {
   const url = `https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(draftText)}`;
   window.open(url, "_blank");
@@ -103,17 +114,25 @@ export default function Agent() {
             </div>
           )}
 
+          <p className="text-xs font-medium text-muted uppercase tracking-wide">{getLabel(recommendation)}</p>
+
+          <p className="text-sm text-ink mt-0.5">
+            {recommendation.text}
+          </p>
+
           {action.status === "APPROVED" && (
-            <div className="flex items-center gap-2 text-positive text-sm">
+            <div className="flex items-center gap-2 text-positive text-sm mt-2">
               <CheckCircle2 size={16} />
-              Approved on {new Date(action.updatedAt).toLocaleDateString()}
+              Approved by user on{" "}
+              {new Date(action.updatedAt).toLocaleDateString("en-GB")}
             </div>
           )}
 
           {action.status === "REJECTED" && (
-            <div className="flex items-center gap-2 text-danger text-sm">
+            <div className="flex items-center gap-2 text-danger text-sm mt-2">
               <XCircle size={16} />
-              Rejected on {new Date(action.updatedAt).toLocaleDateString()}
+              Rejected by user on{" "}
+              {new Date(action.updatedAt).toLocaleDateString("en-GB")}
             </div>
           )}
 
