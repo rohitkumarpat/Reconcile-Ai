@@ -58,6 +58,7 @@ class RecommendationResult(BaseModel):
     subject_merchant: str
     text: str
     action_type: str  # "CANCELLATION_EMAIL" | "NEGOTIATION_MESSAGE"
+    source_index: int 
 
 
 class DraftResult(BaseModel):

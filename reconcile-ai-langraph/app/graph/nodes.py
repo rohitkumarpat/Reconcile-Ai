@@ -242,22 +242,20 @@ Transactions:
 
 
 def recommend_node(subscriptions: list, anomalies: list) -> list[RecommendationResult]:
-    """LLM: turn flagged subscriptions/anomalies into plain-English recommendations."""
     items = (
-        [{"kind": "subscription", "merchant": s.merchant, "amount": s.amount, "frequency": s.frequency} for s in subscriptions]
-        + [{"kind": "anomaly", "transaction_id": a.transaction_id, "explanation": a.explanation} for a in anomalies]
+        [{"index": i, "kind": "subscription", "merchant": s.merchant, "amount": s.amount, "frequency": s.frequency} for i, s in enumerate(subscriptions)]
+        + [{"index": i + len(subscriptions), "kind": "anomaly", "transaction_id": a.transaction_id, "explanation": a.explanation} for i, a in enumerate(anomalies)]
     )
-
     if not items:
         return []
 
-    prompt = f"""For each item, write a one-sentence recommendation for the user and choose an action_type.
-Return ONLY JSON: {{"results": [{{"subject_merchant": str, "text": str, "action_type": "CANCELLATION_EMAIL" or "NEGOTIATION_MESSAGE"}}]}}
+    prompt = f"""For each item, write a one-sentence recommendation and choose an action_type.
+Return ONLY JSON: {{"results": [{{"source_index": int, "subject_merchant": str, "text": str, "action_type": "CANCELLATION_EMAIL" or "NEGOTIATION_MESSAGE"}}]}}
+"source_index" must exactly match the "index" field of the item you're responding to.
 
 Items:
 {json.dumps(items)}
 """
-
     response = llm.invoke(prompt)
     parsed = json.loads(response.content[0]["text"])
     return [RecommendationResult(**r) for r in parsed["results"]]

@@ -23,8 +23,10 @@ export async function generateRecommendations(userId: string) {
     const rec = recommendations[i];
     const draft = drafts.find((d: any) => d.recommendation_index === i);
 
-    const matchedSubscription = subscriptions.find((s) => s.merchant === rec.subject_merchant);
-    const matchedAnomaly = anomalies.find((a) => a.transaction?.merchant === rec.subject_merchant);
+    const matchedSubscription =
+      rec.source_index < subscriptions.length ? subscriptions[rec.source_index] : undefined;
+    const matchedAnomaly =
+      rec.source_index >= subscriptions.length ? anomalies[rec.source_index - subscriptions.length] : undefined;
 
     const recommendation = await prisma.recommendation.create({
       data: {
