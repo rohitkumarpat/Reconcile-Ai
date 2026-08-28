@@ -15,7 +15,19 @@ export async function generateRecommendations(userId: string) {
     }),
   });
 
-  if (!res.ok) throw new Error("Recommendation generation failed");
+if (!res.ok) {
+  const errorText = await res.text();
+
+  console.error("Recommendation service error:", {
+    status: res.status,
+    statusText: res.statusText,
+    body: errorText,
+  });
+
+  throw new Error(
+    `Recommendation service failed: ${res.status} ${errorText}`
+  );
+}
   const { recommendations, drafts } = await res.json();
 
   const created = [];

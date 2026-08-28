@@ -48,9 +48,19 @@ export async function runAgentOnTransactions(userId: string) {
     }
   );
 
-  if (!res.ok) {
-    throw new Error("Agent service failed");
-  }
+if (!res.ok) {
+  const errorText = await res.text();
+
+  console.error("Agent service error:", {
+    status: res.status,
+    statusText: res.statusText,
+    body: errorText,
+  });
+
+  throw new Error(
+    `Agent service failed: ${res.status} ${errorText}`
+  );
+}
 
   const result: AgentRunResult = await res.json();
 
