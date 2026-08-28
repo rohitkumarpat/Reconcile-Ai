@@ -46,13 +46,10 @@ export async function triggerFullAnalysis(req: Request, res: Response) {
 
     res.json(result);
   } catch (err) {
-    console.error(
-      "Full analysis failed:",
-      err instanceof Error ? err.message : err
-    );
+  console.error("FULL ANALYSIS ERROR:", err);
 
-    res.status(500).json({
-      error: "Analysis failed",
-    });
-  }
+  res.status(500).json({
+    error: err instanceof Error ? err.message : String(err),
+  });
+}
 }
