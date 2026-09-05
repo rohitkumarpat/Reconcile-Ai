@@ -11,7 +11,7 @@ from app.schemas import DuplicateFlag, SubscriptionResult, AnomalyResult,Recomme
 
 
 llm = ChatGoogleGenerativeAI(
-    model="gemini-3.5-flash",
+    model="gemini-3.7-flash",
     google_api_key=GEMINI_API_KEY,
     temperature=0,
 )
