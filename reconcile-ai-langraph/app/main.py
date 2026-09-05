@@ -23,8 +23,6 @@ def health():
 
 
 @app.post("/agent/run", response_model=AgentRunResponse)
-
-
 async def run_agent(
     payload: AgentRunRequest,
     x_internal_secret: str = Header(...),
