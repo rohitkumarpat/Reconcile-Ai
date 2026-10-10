@@ -14,34 +14,20 @@ No cancellation or negotiation message is ever sent automatically. Every AI-gene
 
 ---
 
-## Architecture
 
-```
-┌─────────────────────┐
-│   React Frontend     │   reconcile-ai-frontend
-│  (TypeScript, Vite)  │   Deployed on Vercel
-│  Tailwind, shadcn/ui  │
-└──────────┬───────────┘
-           │  HTTPS (Clerk-authenticated REST calls)
-           ▼
-┌─────────────────────┐
-│  Node.js / Express    │   reconcile-ai-backend
-│    TypeScript API     │   Deployed on Render
-│  Prisma ORM, Zod       │
-└──────────┬───────────┘
-           │
-   ┌───────┼────────────────┬─────────────────┐
-   ▼       ▼                ▼                 ▼
-┌──────┐ ┌───────────┐ ┌───────────────┐ ┌────────────┐
-│ Neon  │ │ Cloudinary │ │ Python/FastAPI │ │   Clerk     │
-│Postgres│ │ (file store)│ │  LangGraph Agent│ │(auth)      │
-└──────┘ └───────────┘ └───────┬───────┘ └────────────┘
-                                │
-                                ▼
-                          Gemini API
-                    (extraction, categorization,
-                     detection explanations,
-                     recommendation + draft generation)
+# ReconcileAI — Architecture
+
+```mermaid
+flowchart TD
+    U[User] --> FE["React Frontend<br/>TypeScript, Vite, Tailwind<br/>Vercel"]
+    FE -->|"HTTPS + Clerk JWT"| BE["Node / Express API<br/>Prisma, Zod<br/>Render (Docker)"]
+    BE --> DB[("Neon PostgreSQL")]
+    BE --> CL[Cloudinary<br/>file storage]
+    BE -->|"HTTP + shared secret"| AG["Python / FastAPI<br/>LangGraph Agent<br/>Render (Docker)"]
+    AG --> GM[Gemini API]
+    BE --> GM
+    FE -.->|auth UI| CK[Clerk]
+    BE -.->|verify token| CK
 ```
 
 **Three independently deployable services:**
